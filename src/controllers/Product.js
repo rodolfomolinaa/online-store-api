@@ -1,6 +1,5 @@
 const { rdb } = require('../services/firebase/firebase');
 const serverConfig = require('../configs/server-config');
-const products = require('../models/Products');
 
 exports.index = async (req, res, next) => {
     rdb.ref('products').once('value', (snapshot) => {
