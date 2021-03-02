@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 });
 
 //Set public routes
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 //Set API Routes
 app.use('/api/products', require('./routes/product'));
