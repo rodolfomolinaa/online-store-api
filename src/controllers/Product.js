@@ -1,65 +1,40 @@
-const { rdb } = require('../services/firebase/firebase');
-const serverConfig = require('../configs/server-config');
+const Product = require('../models/Product');
 
-exports.index = async (req, res, next) => {
-    rdb.ref('products').once('value', (snapshot) => {
-        let products = snapshot.val();
-        products = Object.keys(products).map((key) => ({
-            id: key,
-            ...products[key],
-            imageUrl: `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${products[key].imageUrl}`,
-        }));
-        res.status(200).json({
-            products,
-        });
-    });
+const getProducts = async (req, res, next) => {
+    await Product.getAll()
+        .then((response) => res.status(200).json(response))
+        .catch((error) => res.status(400).json({ message: error }));
 };
 
-exports.show = (req, res, next) => {
+const getProduct = async (req, res, next) => {
     const productId = req.params.id;
-    rdb.ref('products')
-        .child(productId)
-        .once('value', (snapshot) => {
-            let product = snapshot.val();
-
-            if (product != null) {
-                product.imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${product.imageUrl}`;
-                product = { id: productId, ...product };
-                res.status(200).json({
-                    product: product,
-                });
-            }
-        });
+    await Product.getById(productId)
+        .then((response) => res.status(200).json(response))
+        .catch((error) => res.status(400).json({ message: error }));
 };
 
-exports.store = (req, res, next) => {
+const saveProduct = async (req, res, next) => {
     const title = req.body.title;
     const price = parseFloat(req.body.price);
+    const details = req.body.details;
     const image = req.file;
-    if (!image || title == '' || (price || -1) <= 0) {
+
+    if (!image || title == '' || details == '' || (price || -1) <= 0) {
         return res.status(402).json({
             message: 'Error to add product!',
         });
     }
 
     const imageUrl = image.path.replace('public/', '');
-    const newProduct = {
-        title,
-        price,
-        imageUrl,
-    };
-    rdb.ref('products')
-        .push(newProduct)
-        .then((ref) => {
-            newProduct.imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${newProduct.imageUrl}`;
-            res.status(201).json({
-                message: 'Product created successfully',
-                product: { id: ref.key, ...newProduct },
-            });
-        });
+    const product = new Product(title, price, details, imageUrl);
+
+    await product
+        .save()
+        .then((response) => res.status(201).json(response))
+        .catch((error) => res.status(400).json({ message: error }));
 };
 
-exports.update = (req, res, next) => {
+const updateProduct = async (req, res, next) => {
     const image = req.file;
     const productId = req.params.id;
 
@@ -72,32 +47,39 @@ exports.update = (req, res, next) => {
         req.body.price = parseFloat(req.body.price);
     }
 
-    rdb.ref('products')
-        .child(productId)
-        .update({ ...req.body })
-        .then(() => {
-            if (req.body.image) {
-                req.body.imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${imageUrl}`;
-            }
-            res.status(200).json({
-                id: productId,
-                ...req.body,
-            });
-        })
-        .catch(() => {
-            res.status(401).json({ message: 'Error to update product' });
-        });
+    const product = new Product(
+        req.body.title,
+        req.body.price,
+        req.body.details,
+        req.body.imageUrl,
+        productId,
+    );
+    await product
+        .update()
+        .then((response) => res.status(201).json(response))
+        .catch((error) => res.status(400).json({ message: error }));
 };
 
-exports.delete = (req, res, next) => {
+const deleteProduct = async (req, res, next) => {
     const productId = req.params.id;
-    rdb.ref('products')
-        .child(productId)
-        .remove()
-        .then(() =>
-            res.status(200).json({ message: 'Product deleted correctly!' }),
-        )
-        .catch(() =>
-            res.status(401).json({ message: 'Error to delete product!' }),
-        );
+    await Product.delete(productId)
+        .then((response) => res.status(200).json(response))
+        .catch((error) => res.status(400).json({ message: error }));
+    // rdb.ref('products')
+    //     .child(productId)
+    //     .remove()
+    //     .then(() =>
+    //         res.status(200).json({ message: 'Product deleted correctly!' }),
+    //     )
+    //     .catch(() =>
+    //         res.status(401).json({ message: 'Error to delete product!' }),
+    //     );
+};
+
+module.exports = {
+    getProducts,
+    getProduct,
+    saveProduct,
+    updateProduct,
+    deleteProduct,
 };
