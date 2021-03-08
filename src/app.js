@@ -3,8 +3,13 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
 
+//Config
 const serverConfig = require('./configs/server-config');
 const filesConfig = require('./configs/files-config');
+
+//Database
+const firebaseConnection = require('./database/firebase/firebase')
+    .firebaseConnection;
 
 const app = express();
 
@@ -32,6 +37,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 //Set API Routes
 app.use('/api/products', require('./routes/product'));
+
+//Database connection
+firebaseConnection();
 
 app.listen(serverConfig.port, serverConfig.ip, () =>
     console.log(
