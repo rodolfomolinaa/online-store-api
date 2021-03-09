@@ -8,6 +8,7 @@ const getProducts = async (req, res, next) => {
 
 const getProduct = async (req, res, next) => {
     const productId = req.params.id;
+    console.log('productId', productId);
     await Product.getById(productId)
         .then((response) => res.status(200).json(response))
         .catch((error) => res.status(400).json({ message: error }));
@@ -16,17 +17,24 @@ const getProduct = async (req, res, next) => {
 const saveProduct = async (req, res, next) => {
     const title = req.body.title;
     const price = parseFloat(req.body.price);
-    const details = req.body.details;
+    const quantity = parseInt(req.body.quantity);
+    const detail = req.body.detail;
     const image = req.file;
 
-    if (!image || title == '' || details == '' || (price || -1) <= 0) {
+    if (
+        !image ||
+        title == '' ||
+        detail == '' ||
+        quantity == 0 ||
+        (price || -1) <= 0
+    ) {
         return res.status(402).json({
             message: 'Error to add product!',
         });
     }
 
     const imageUrl = image.path.replace('public/', '');
-    const product = new Product(title, price, details, imageUrl);
+    const product = new Product(title, price, quantity, detail, imageUrl);
 
     await product
         .save()
@@ -50,7 +58,8 @@ const updateProduct = async (req, res, next) => {
     const product = new Product(
         req.body.title,
         req.body.price,
-        req.body.details,
+        req.body.quantity,
+        req.body.detail,
         req.body.imageUrl,
         productId,
     );

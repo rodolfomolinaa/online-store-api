@@ -2,10 +2,11 @@ const serverConfig = require('../configs/server-config');
 const getFirebaseDB = require('../database/firebase/firebase').getDB;
 
 module.exports = class Product {
-    constructor(title, price, details, imageUrl, id) {
+    constructor(title, price, quantity, detail, imageUrl, id) {
         this.title = title;
         this.price = price;
-        this.details = details;
+        this.quantity = quantity;
+        this.detail = detail;
         this.imageUrl = imageUrl;
         this.id = id;
     }
@@ -23,7 +24,7 @@ module.exports = class Product {
                         imageUrl: `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${products[key].imageUrl}`,
                     }));
                     products = products || [];
-                    resolve({ message: 'success', data: products });
+                    resolve({ message: 'success', products: products });
                 })
                 .catch((error) => {
                     reject({ message: 'Error to get products', error: error });
@@ -32,6 +33,7 @@ module.exports = class Product {
     }
 
     static getById(id) {
+        console.log('get product by id', id);
         const database = getFirebaseDB();
         return new Promise((resolve, reject) => {
             database
@@ -43,7 +45,7 @@ module.exports = class Product {
                     if (product != null) {
                         product.imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${product.imageUrl}`;
                         product = { id: id, ...product };
-                        resolve({ message: 'success', product: { product } });
+                        resolve({ message: 'success', product });
                     }
                 })
                 .catch((error) => {
@@ -69,6 +71,7 @@ module.exports = class Product {
     }
 
     save() {
+        console.log('save from model', this.title);
         const database = getFirebaseDB();
         return new Promise((resolve, reject) => {
             database
@@ -76,7 +79,8 @@ module.exports = class Product {
                 .push({
                     title: this.title,
                     price: this.price,
-                    details: this.details,
+                    stock: this.quantity,
+                    detail: this.detail,
                     imageUrl: this.imageUrl,
                 })
                 .then((result) => {
@@ -87,7 +91,8 @@ module.exports = class Product {
                             id: result.key,
                             title: this.title,
                             price: this.price,
-                            details: this.details,
+                            stock: this.quantity,
+                            detail: this.detail,
                             imageUrl: imageUrl,
                         },
                     });
@@ -107,6 +112,7 @@ module.exports = class Product {
             const product = {
                 title: this.title,
                 price: this.price,
+                stock: this.quantity,
                 details: this.details,
                 imageUrl: this.imageUrl,
             };
