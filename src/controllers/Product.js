@@ -8,7 +8,6 @@ const getProducts = async (req, res, next) => {
 
 const getProduct = async (req, res, next) => {
     const productId = req.params.id;
-    console.log('productId', productId);
     await Product.getById(productId)
         .then((response) => res.status(200).json(response))
         .catch((error) => res.status(400).json({ message: error }));
