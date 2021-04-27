@@ -33,7 +33,6 @@ module.exports = class Product {
     }
 
     static getById(id) {
-        console.log('get product by id', id);
         const database = getFirebaseDB();
         return new Promise((resolve, reject) => {
             database
@@ -71,7 +70,6 @@ module.exports = class Product {
     }
 
     save() {
-        console.log('save from model', this.title);
         const database = getFirebaseDB();
         return new Promise((resolve, reject) => {
             database
