@@ -21,7 +21,7 @@ module.exports = class Product {
                     products = Object.keys(products).map((key) => ({
                         id: key,
                         ...products[key],
-                        imageUrl: `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${products[key].imageUrl}`,
+                        imageUrl: `${serverConfig.scheme}://${serverConfig.server}${serverConfig.imagePort}/${products[key].imageUrl}`,
                     }));
                     products = products || [];
                     resolve({ message: 'success', products: products });
@@ -42,7 +42,7 @@ module.exports = class Product {
                     let product = snapshot.val();
 
                     if (product != null) {
-                        product.imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${product.imageUrl}`;
+                        product.imageUrl = `${serverConfig.scheme}://${serverConfig.server}${serverConfig.imagePort}/${product.imageUrl}`;
                         product = { id: id, ...product };
                         resolve({ message: 'success', product });
                     }
@@ -82,7 +82,7 @@ module.exports = class Product {
                     imageUrl: this.imageUrl,
                 })
                 .then((result) => {
-                    const imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${this.imageUrl}`;
+                    const imageUrl = `${serverConfig.scheme}://${serverConfig.server}${serverConfig.imagePort}/${this.imageUrl}`;
                     resolve({
                         message: 'Product saved succesfully',
                         product: {
@@ -120,7 +120,7 @@ module.exports = class Product {
                 .update({ ...product })
                 .then(() => {
                     if (product.imageUrl) {
-                        product.imageUrl = `${serverConfig.scheme}://${serverConfig.server}:${serverConfig.port}/${product.imageUrl}`;
+                        product.imageUrl = `${serverConfig.scheme}://${serverConfig.server}${serverConfig.imagePort}/${product.imageUrl}`;
                     }
                     resolve({
                         message: 'Product updated succesfully',
