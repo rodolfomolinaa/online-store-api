@@ -13,6 +13,8 @@ const firebaseConnection = require('./database/firebase/firebase')
 
 const app = express();
 
+app.use(express.static(path.join(__dirname, 'client/build/')));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -41,7 +43,11 @@ app.use('/api/products', require('./routes/product'));
 //Database connection
 firebaseConnection();
 
-app.listen(serverConfig.port, serverConfig.ip, () =>
+app.get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, '/client/build/index.html'));
+});
+
+app.listen(serverConfig.port, () =>
     console.log(
         `Server started at ${serverConfig.server} on port ${serverConfig.port}`,
     ),
